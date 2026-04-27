@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # TrialON
 
 **AI-Assisted IRB Preparation & Study Startup Acceleration**
@@ -266,4 +266,3 @@ npm install
 =======
 # trialon-bernard
 Personal IRB Application Project
->>>>>>> 332d91d23ed33a290fb23dcb5be7a39eea802d7e
