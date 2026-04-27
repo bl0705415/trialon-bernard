@@ -20,8 +20,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `${process.env.PUBLIC_URL}/pdf.worker.m
 
 // ─── Supabase ────
 const supabase = createClient(
-  "https://rxepavvxustsikfsilpc.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXBhdnZ4dXN0c2lrZnNpbHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTIzMDYsImV4cCI6MjA5MDY2ODMwNn0.zLO00rby8ji5GzWcfNXwIjuUZ79Ee3sxSJH1m7EQ7Es"
+  "https://ceeokkzjugmjckdvjnwf.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlZW9ra3pqdWdtamNrZHZqbndmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNDI4NDEsImV4cCI6MjA5MjgxODg0MX0.rsWTnjLdz-HJDovlSmfjlnhomznUDPhZfLpfDfIU_I4"
 );
 
 // ─── Hardcoded Auth ────
@@ -839,8 +839,15 @@ const Upload = ({ onParsed, onCancel }) => {
   );
 };
 
+//DELETE A STUDY
+const handleDeleteStudy = async (studyId) => {
+  const { error } = await supabase.from("studies").delete().eq("id", studyId);
+  if (!error) setStudies(prev => prev.filter(s => s.studyId !== studyId));
+};
+
+
 // ─── AllStudies ────
-const AllStudies = ({ studies, onSelect, onNew }) => {
+const AllStudies = ({ studies, onSelect, onNew, onDelete }) => {
   const [filter,setFilter] = useState(""); const [showFilter,setShowFilter] = useState(false);
   const filtered = filter ? studies.filter(s => s.title.toLowerCase().includes(filter.toLowerCase()) || s.sponsor?.toLowerCase().includes(filter.toLowerCase())) : studies;
   return (
@@ -856,7 +863,7 @@ const AllStudies = ({ studies, onSelect, onNew }) => {
       <div style={{ background:C.surface, borderRadius:8, border:`1px solid ${C.border}`, overflow:"hidden" }}>
         <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
           <thead><tr style={{ borderBottom:`2px solid ${C.border}`, textAlign:"left" }}>
-            {["STUDY TITLE","PRODUCT","PHASE","PROGRESS","TOP BLOCKER","MY NEXT TASK","LAST UPDATED"].map(h => <th key={h} style={{ padding:"10px 14px", fontSize:11, fontWeight:700, color:C.textMuted, textTransform:"uppercase", letterSpacing:0.5 }}>{h}</th>)}
+            {["STUDY TITLE","PRODUCT","PHASE","PROGRESS","TOP BLOCKER","MY NEXT TASK","LAST UPDATED",""].map(h => <th key={h} style={{ padding:"10px 14px", fontSize:11, fontWeight:700, color:C.textMuted, textTransform:"uppercase", letterSpacing:0.5 }}>{h}</th>)}
           </tr></thead>
           <tbody>
             {filtered.map((s,i) => { const pct = Math.round((s.filled/(s.filled+s.missing+s.confirm))*100)||0; return (
@@ -868,6 +875,16 @@ const AllStudies = ({ studies, onSelect, onNew }) => {
                 <td style={{ padding:"12px 14px" }}>{s.blocker ? <span style={{ color:C.red, fontSize:12 }}>⚠ {s.blocker}</span> : <span style={{ color:C.textMuted, fontSize:12 }}>—</span>}</td>
                 <td style={{ padding:"12px 14px" }}><span style={{ color:C.accent, fontSize:12 }}>{s.nextTask||"Review docs"} →</span></td>
                 <td style={{ padding:"12px 14px", color:C.textMuted, fontSize:12 }}>{s.updated||"Just now"}</td>
+                <td style={{ padding:"12px 14px" }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm("Delete this study?")) onDelete(s.studyId || s.id);
+                    }}
+                    style={{ padding:"5px 10px", borderRadius:6, border:"none", background:"#fee2e2", color:"#dc2626", fontSize:12, fontWeight:600, cursor:"pointer" }}>
+                    Delete
+                  </button>
+                </td>
               </tr>
             );})}
           </tbody>
@@ -1736,6 +1753,7 @@ function App() {
 
         if (page==="studies") return (
           <AllStudies studies={studies} onNew={() => setPage("upload")}
+            onDelete={handleDeleteStudy}
             onSelect={idx => {
               const picked = typeof idx==="number" ? studies[idx] : idx;
               if (!picked) return;
