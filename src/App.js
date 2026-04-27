@@ -22,6 +22,12 @@ import DocumentsTab from "./components/DocumentsTab";
 import RCDashboard from "./dashboards/RCDashboard";
 import LegalDashboard from "./dashboards/LegalDashboard";
 import CRODashboard from "./dashboards/CRODashboard";
+import LegalDocumentsTab from "./components/LegalDocumentsTab";
+import ActivationMap from "./components/ActivationMap";
+import ActivationReadiness from "./components/ActivationReadiness";
+import ReviewDocs from "./components/ReviewDocs";
+import { buildDocElement } from "./utils/buildDocElement";
+import { pdf } from "@react-pdf/renderer";
 
 
 
@@ -32,165 +38,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `${ process.env.PUBLIC_URL }/pdf.worker
 
 
 
-const LegalDocumentsTab = ({ studyId, studyTitle, onBack, isPushed }) => {
-  const BUCKET_URL = "https://rxepavvxustsikfsilpc.supabase.co/storage/v1/object/public/study-pdfs";
-
-  const docs = [
-    { id: "irb", name: "IRB Application.pdf", type: "IRB Application" },
-    { id: "consent", name: "Consent Form.pdf", type: "Consent Form" },
-    { id: "cta", name: "Draft Clinical Trial Agreement.pdf", type: "Clinical Trial Agreement" },
-  ];
-
-  if (!isPushed) return (
-    <div style={{ padding: "24px 0" }}>
-      <button onClick={onBack} style={{ padding: "10px 16px", borderRadius: 8, border: `1px solid ${ C.border }`, background: "#fff", color: C.text, fontSize: 13, fontWeight: 600, cursor: "pointer", marginBottom: 20 }}>← Back</button>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300, gap: 16, textAlign: "center" }}>
-        <div style={{ fontSize: 40 }}>📭</div>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: C.text }}>Documents Not Yet Shared</h2>
-        <p style={{ fontSize: 14, color: C.textMuted, maxWidth: 360, lineHeight: 1.6 }}>The Regulatory Coordinator hasn't sent these documents to you yet. Check back soon!</p>
-      </div>
-    </div>
-  );
-
-  return (
-    <div style={{ padding: "24px 0" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-        <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: C.text, marginBottom: 4 }}>Documents</h2>
-          <p style={{ fontSize: 13, color: C.textMuted }}>{studyTitle || "Untitled Study"}</p>
-        </div>
-        <button
-          onClick={onBack}
-          style={{ padding: "10px 16px", borderRadius: 8, border: `1px solid ${ C.border }`, background: "#fff", color: C.text, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-          ← Back to Dashboard
-        </button>
-      </div>
-
-      <div style={{ display: "grid", gap: 12, marginBottom: 24 }}>
-        {docs.map(doc => {
-          const url = `${ BUCKET_URL }/${ studyId }/${ doc.id }.pdf`;
-          return (
-            <div key={doc.id} style={{ background: "#fff", border: `1px solid ${ C.border }`, borderRadius: 10, padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{doc.name}</div>
-                <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>{doc.type}</div>
-              </div>
-              <div style={{ display: "flex", gap: 10 }}>
-                <button
-                  onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
-                  style={{ padding: "8px 12px", borderRadius: 8, background: C.accentLight, color: C.accent, border: "none", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                  View
-                </button>
-                <button
-                  onClick={async () => {
-                    const res = await fetch(url);
-                    if (!res.ok) { alert("PDF not yet generated. Ask the RC to view it first."); return; }
-                    const blob = await res.blob();
-                    const a = document.createElement("a");
-                    a.href = URL.createObjectURL(blob);
-                    a.download = doc.name;
-                    a.click();
-                  }}
-                  style={{ padding: "8px 12px", borderRadius: 8, background: C.accent, color: "#fff", border: "none", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                  Download
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
 
 
 
-
-
-// ─── Activation Map ────
-const ActivationMap = ({ onBack, onNav }) => {
-  const steps = [{ name: "INTAKE", status: "complete", desc: "Submit IRB application and approvals" }, { name: "IRB", status: "active", desc: "Submit IRB application and approvals" }, { name: "CONTRACT", status: "locked", desc: "Clinical trial agreement review" }, { name: "BUDGET", status: "locked", desc: "Budget negotiation and approval" }, { name: "ACTIVATION READINESS", status: "locked", desc: "Final activation checklist" }];
-  const icons = { complete: "✅", active: "📝", locked: "🔒" };
-  const colors = { complete: C.green, active: C.accent, locked: C.textDim };
-  return (
-    <div style={{ padding: "24px 0", maxWidth: 500 }}>
-      <button onClick={onBack} style={{ fontSize: 12, color: C.accent, background: "none", border: "none", cursor: "pointer", marginBottom: 16 }}>← Go back</button>
-      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 24 }}>Activation Map</h2>
-      {steps.map((s, i) => (
-        <div key={s.name} style={{ display: "flex", gap: 16 }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ width: 40, height: 40, borderRadius: 8, background: s.status === "locked" ? C.bg : s.status === "complete" ? C.greenBg : C.accentLight, border: `2px solid ${ colors[s.status] }`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{icons[s.status]}</div>
-            {i < steps.length - 1 && <div style={{ width: 2, height: 40, background: C.border }} />}
-          </div>
-          <div style={{ paddingTop: 4, flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: s.status === "locked" ? C.textMuted : C.text }}>{s.name}</span>
-              {s.status === "active" && <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 10, fontWeight: 700, background: C.redBg, color: C.red }}>BLOCKED</span>}
-              {s.status === "complete" && <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 10, fontWeight: 700, background: C.greenBg, color: C.green }}>COMPLETE</span>}
-            </div>
-            {s.status !== "locked" && <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>{s.desc}</div>}
-            {s.status === "locked" && <div style={{ fontSize: 12, color: C.textDim, marginTop: 2, fontStyle: "italic" }}>Locked until previous steps complete</div>}
-            {s.status === "active" && <button onClick={() => onNav("review")} style={{ marginTop: 6, padding: "4px 12px", borderRadius: 4, border: "none", background: C.accent, color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>GO TO IRB →</button>}
-            <div style={{ height: i < steps.length - 1 ? 16 : 0 }} />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// ─── Activation Readiness ────
-const ActivationReadiness = ({ data, onBack, onNav }) => {
-  const pct = 65;
-  const remaining = [{ item: "IRB not approved", owner: "Regulatory", nav: "review" }, { item: "Contract not signed", owner: "Legal", nav: "review" }, { item: "Budget not final", owner: "Finance", nav: "review" }];
-  return (
-    <div style={{ padding: "24px 0", maxWidth: 600 }}>
-      <button onClick={onBack} style={{ fontSize: 12, color: C.accent, background: "none", border: "none", cursor: "pointer", marginBottom: 16 }}>← Go back</button>
-      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 24 }}>ACTIVATION READINESS</h2>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
-        <div style={{ position: "relative", width: 160, height: 160 }}>
-          <svg width="160" height="160" viewBox="0 0 160 160"><circle cx="80" cy="80" r="70" fill="none" stroke={C.border} strokeWidth="12" /><circle cx="80" cy="80" r="70" fill="none" stroke={C.accent} strokeWidth="12" strokeDasharray={`${ pct * 4.4 } 440`} strokeLinecap="round" transform="rotate(-90 80 80)" /></svg>
-          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center" }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: C.textMuted }}>ACTIVATION</div><div style={{ fontSize: 11, fontWeight: 700, color: C.textMuted }}>READY</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: C.accent }}>{pct}%</div>
-          </div>
-        </div>
-      </div>
-      {remaining.map((r, i) => (
-        <div key={i} style={{ background: C.surface, borderRadius: 6, border: `1px solid ${ C.border }`, padding: "12px 16px", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div><div style={{ fontSize: 13, fontWeight: 600 }}>{r.item}</div><div style={{ fontSize: 11, color: C.textMuted }}>Owner: {r.owner}</div></div>
-          <button onClick={() => onNav && onNav(r.nav)} style={{ padding: "4px 12px", borderRadius: 4, border: `1px solid ${ C.border }`, background: C.surface, fontSize: 11, fontWeight: 600, color: C.accent, cursor: "pointer" }}>GO TO {r.item.split(" ")[0].toUpperCase()} →</button>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// ─── Review Docs ────
-const ReviewDocs = ({ templates, onSelect, onContinue, onCancel }) => (
-  <div style={{ padding: "24px 0" }}>
-    <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Review Documents</h2>
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24 }}>
-      {Object.entries(templates).map(([key, tmpl]) => {
-        const stats = tmpl.sections.flatMap(s => s.fields).reduce((a, f) => { a[f.status] = (a[f.status] || 0) + 1; a.total++; return a; }, { total: 0 }); return (
-          <div key={key} onClick={() => onSelect(key)} style={{ background: C.surface, borderRadius: 8, border: `1px solid ${ C.border }`, padding: 20, cursor: "pointer" }} onMouseEnter={e => e.currentTarget.style.borderColor = C.accent} onMouseLeave={e => e.currentTarget.style.borderColor = C.border}>
-            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{tmpl.icon} {tmpl.name}</div>
-            <div style={{ fontSize: 12, color: C.textMuted }}>{tmpl.desc}</div>
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-              <span style={{ fontSize: 10, color: C.green, fontWeight: 600 }}>● {stats[ST.AUTO] || 0}</span>
-              <span style={{ fontSize: 10, color: C.yellow, fontWeight: 600 }}>● {stats[ST.CONFIRM] || 0}</span>
-              <span style={{ fontSize: 10, color: C.red, fontWeight: 600 }}>● {stats[ST.MISSING] || 0}</span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-    <div style={{ display: "flex", gap: 10 }}>
-      <button onClick={onContinue} style={{ padding: "9px 22px", borderRadius: 4, border: "none", background: C.accent, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>CONTINUE</button>
-      <button onClick={onCancel} style={{ padding: "9px 22px", borderRadius: 4, border: "none", background: C.red, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>CANCEL</button>
-    </div>
-  </div>
-);
 
 // ─── Main App ────
 function App() {
@@ -200,18 +50,61 @@ function App() {
   const [studyData, setStudyData] = useState(null);
   const [formData, setFormData] = useState(null);
   const [templates, setTemplates] = useState(null);
-  const [setClauses] = useState([]);
   const [activeTmpl, setActiveTmpl] = useState(null);
   const [studies, setStudies] = useState([]);
   const [missingFields, setMissingFields] = useState([]);
   const [wizardData, setWizardData] = useState(null);
   const [selectedStudy, setSelectedStudy] = useState(null);
-  const [setGeneratingDocs] = useState(false);
+  const [, setClauses] = useState([]);
+  const [, setGeneratingDocs] = useState(false);
+
   //DELETE A STUDY
   const handleDeleteStudy = async (studyId) => {
-    const { error } = await supabase.from("studies").delete().eq("id", studyId);
-    if (!error) setStudies(prev => prev.filter(s => s.studyId !== studyId));
-    else alert("Failed to delete: " + error.message);
+    console.log("DELETE CLICKED:", studyId);
+
+    if (!studyId) {
+      console.error("Missing ID");
+      return;
+    }
+
+    //  1. list files in folder
+    const { data: files, error: listError } = await supabase
+      .storage
+      .from("study-pdfs")
+      .list(studyId);
+
+    if (listError) {
+      console.error("LIST ERROR:", listError);
+    }
+
+    if (files && files.length > 0) {
+      const paths = files.map(f => `${ studyId }/${ f.name }`);
+
+      //  2. delete files
+      const { error: deleteFilesError } = await supabase
+        .storage
+        .from("study-pdfs")
+        .remove(paths);
+
+      if (deleteFilesError) {
+        console.error("FILE DELETE ERROR:", deleteFilesError);
+      } else {
+        console.log("FILES DELETED:", paths);
+      }
+    }
+
+    //  3. delete DB row
+    const { error } = await supabase
+      .from("studies")
+      .delete()
+      .eq("id", studyId);
+
+    if (error) {
+      console.error("DELETE ERROR:", error);
+    } else {
+      console.log("DELETE SUCCESS");
+      setStudies(prev => prev.filter(s => s.id !== studyId));
+    }
   };
 
   // Load studies from Supabase on login
@@ -230,7 +123,6 @@ function App() {
 
           return {
             id: r.id,
-            studyId: r.id,
             pushed_to_legal: r.pushed_to_legal || false,
             pushed_to_cro: r.pushed_to_cro || false,
             title: r.title,
@@ -266,6 +158,7 @@ function App() {
   }, [persona]);
 
   const handleExtracted = (extracted, form) => {
+    console.log("RECEIVED IN APP:", extracted);
     setFormData(form);
     const missing = PROTOCOL_FIELDS.filter(f => { const v = extracted[f.id]; return !v || v.toString().trim() === "" || v === "N/A"; });
     if (missing.length > 0) { setMissingFields(missing); setWizardData(extracted); setPage("wizard"); }
@@ -306,18 +199,64 @@ function App() {
 
       // ── PDF document descriptors (lazy) ──
       const documents = [
-        { id: "irb", name: "IRB Application.pdf", type: "IRB Application", createdAt: new Date().toISOString() },
-        { id: "consent", name: "Consent Form.pdf", type: "Consent Form", createdAt: new Date().toISOString() },
-        { id: "cta", name: "Draft Clinical Trial Agreement.pdf", type: "Clinical Trial Agreement", createdAt: new Date().toISOString() },
+        {
+          id: "irb",
+          name: "IRB Application.pdf",
+          type: "IRB Application",
+          path: `${ studyId }/irb-${ Date.now() }.pdf`,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "consent",
+          name: "Consent Form.pdf",
+          type: "Consent Form",
+          path: `${ studyId }/consent-${ Date.now() }.pdf`,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "cta",
+          name: "Draft Clinical Trial Agreement.pdf",
+          type: "Clinical Trial Agreement",
+          path: `${studyId}/cta-${Date.now()}.pdf`,
+          createdAt: new Date().toISOString()
+        }
       ];
 
+
+      for (const doc of documents) {
+        try {
+          console.log("START:", doc.id);
+
+          const docElement = buildDocElement(doc.id, data, builtClauses);
+          console.log("docElement:", !!docElement);
+
+          const blob = await pdf(docElement).toBlob();
+          console.log("Blob size:", blob.size);
+
+          const { error } = await supabase.storage
+            .from("study-pdfs")
+            .upload(doc.path, blob, {
+              contentType: "application/pdf",
+              upsert: true,
+            });
+
+          if (error) {
+            console.error("UPLOAD ERROR:", error);
+          } else {
+            console.log("UPLOAD SUCCESS:", doc.path);
+          }
+
+        } catch (err) {
+          console.error("LOOP ERROR:", doc.id, err);
+        }
+      }
       const allF = Object.values(tmpls).flatMap(t => t.sections.flatMap(s => s.fields));
       const filledCount = allF.filter(f => f.status === ST.AUTO).length;
       const confirmCount = allF.filter(f => f.status === ST.CONFIRM).length;
       const missingCount = allF.filter(f => f.status === ST.MISSING).length;
 
       const newStudy = {
-        studyId,
+        id: studyId,
         title: data.protocol_title_full || form?.studyTitle || "Untitled",
         sponsor: data.investigational_product_name || form?.sponsorName || "—",
         phases: data.study_phase || "N/A",
@@ -344,7 +283,7 @@ function App() {
       };
 
       // ── Save to Supabase ──
-      console.log("=== ABOUT TO INSERT ===", { studyId, title: newStudy.title });
+      console.log("=== ABOUT TO INSERT ===", { id: studyId, studyId, title: newStudy.title });
       const { data: insertData, error: insertError } = await supabase.from("studies").insert({
         id: studyId,
         title: newStudy.title,
@@ -354,8 +293,10 @@ function App() {
         contract_sections: contractSections,
         consent_sections: consentSections,
         uploaded_at: Date.now(),
-        extracted_fields: data,
-        archived: false,
+        extracted_fields: {
+          ...data,
+          generatedContent: data.generatedContent || {}
+        }, archived: false,
       });
       console.log("=== INSERT DONE ===", { insertData, insertError });
       if (insertError) console.error("Supabase insert error:", insertError.message);
@@ -369,19 +310,34 @@ function App() {
       setSelectedStudy(newStudy);
 
       setStudies(prev => {
-        const protocolNum = data.protocol_number;
+        const normalized = prev.map(s => ({
+          ...s,
+          id: s.id || s.studyId
+        }));
+
+        const newNormalized = {
+          ...newStudy,
+          id: newStudy.id || newStudy.studyId
+        };
+
         let next;
+        const protocolNum = data.protocol_number;
+
         if (protocolNum) {
-          const existingIdx = prev.findIndex(s => s.extractedData?.protocol_number === protocolNum);
+          const existingIdx = normalized.findIndex(
+            s => s.extractedData?.protocol_number === protocolNum
+          );
+
           if (existingIdx !== -1) {
-            invalidateStudyCache(prev[existingIdx].studyId);
-            next = [newStudy, ...prev.filter((_, i) => i !== existingIdx)];
+            invalidateStudyCache(normalized[existingIdx].id);
+            next = [newNormalized, ...normalized.filter((_, i) => i !== existingIdx)];
           } else {
-            next = [newStudy, ...prev];
+            next = [newNormalized, ...normalized];
           }
         } else {
-          next = [newStudy, ...prev];
+          next = [newNormalized, ...normalized];
         }
+
         return next;
       });
 
@@ -423,15 +379,15 @@ function App() {
         if (page === "upload") return <Upload onParsed={handleExtracted} onCancel={() => setPage(studies.length ? "studies" : "upload")} />;
 
         if (page === "studies") return (
-          <AllStudies studies={studies} onNew={() => setPage("upload")}
+          <AllStudies studies={studies}
+            onNew={() => setPage("upload")}
             onDelete={handleDeleteStudy}
-            onSelect={idx => {
-              const picked = typeof idx === "number" ? studies[idx] : idx;
-              if (!picked) return;
-              setSelectedStudy(picked);
-              setStudyData(picked.extractedData || null);
-              setTemplates(picked.templates || null);
-              setClauses(picked.clauses || []);
+            onSelect={s => {
+              if (!s) return;
+              setSelectedStudy(s);
+              setStudyData(s.extractedData || null);
+              setTemplates(s.templates || null);
+              setClauses(s.clauses || []);
               setActiveTmpl(null);
               setPage("fields");
             }}

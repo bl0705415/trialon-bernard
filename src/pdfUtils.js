@@ -2,8 +2,8 @@ import { pdf } from "@react-pdf/renderer";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
-  "https://rxepavvxustsikfsilpc.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXBhdnZ4dXN0c2lrZnNpbHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTIzMDYsImV4cCI6MjA5MDY2ODMwNn0.zLO00rby8ji5GzWcfNXwIjuUZ79Ee3sxSJH1m7EQ7Es"
+  "https://ceeokkzjugmjckdvjnwf.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlZW9ra3pqdWdtamNrZHZqbndmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNDI4NDEsImV4cCI6MjA5MjgxODg0MX0.rsWTnjLdz-HJDovlSmfjlnhomznUDPhZfLpfDfIU_I4"
 );
 
 const BUCKET = "study-pdfs";

@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from "react";
 import C from "../constants/colors";
 import { extractTextFromPDF } from "../utils/extractPdfText";
-import { extractFieldsWithGPT } from "../services/aiService";
+import { extractFieldsWithGPT, generateDocumentContent } from "../services/aiService";
 
 
 // ─── Upload ────
@@ -22,10 +22,24 @@ const Upload = ({ onParsed, onCancel }) => {
             if (!text || text.trim().length < 100) { setErr("Could not extract text from PDF."); setLoading(false); return; }
             setProg(55); setProgMsg("Running AI extraction of 50 fields...");
             const extracted = await extractFieldsWithGPT(text);
+            const generatedContent = await generateDocumentContent(extracted);
+            
+            
             if (form.studyTitle) extracted.protocol_title_full = form.studyTitle;
-            if (form.sponsorName) extracted.investigational_product_name = extracted.investigational_product_name || form.sponsorName;
+            if (form.sponsorName) {
+                extracted.investigational_product_name =
+                    extracted.investigational_product_name || form.sponsorName;
+            }
+
+            // merge
+            const combined = {
+                ...extracted,
+                generatedContent
+            };
+
+            onParsed(combined, form);
+
             setProg(100); setProgMsg("Done!");
-            setTimeout(() => onParsed(extracted, form), 400);
         } catch (e) { setErr("Error: " + e.message); setLoading(false); }
     };
 

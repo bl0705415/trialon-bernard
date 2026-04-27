@@ -7,11 +7,26 @@ import {
 } from "../pdfDoc";
 
 export function buildDocElement(docId, extractedData, clauses) {
+
     switch (docId) {
         case "irb": return <IRBApplicationPDF data={extractedData} />;
-        case "consent": return <ConsentFormPDF data={extractedData} />;
-        case "cta": return <ClinicalTrialAgreementPDF data={extractedData} clauses={clauses} />;
-        default: throw new Error(`Unknown docId: ${ docId }`);
+        case "consent":
+            return (
+                <ConsentFormPDF
+                    data={extractedData}
+                    generated={extractedData.generatedContent || {}}
+                />
+            );
+        case "cta":
+            return (
+                <ClinicalTrialAgreementPDF
+                    data={extractedData}
+                    clauses={clauses}
+                />
+            );
+
+        default:
+            throw new Error(`Unknown docId: ${ docId }`);
     }
 }
 

@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   }
 });
 
-const safe = (v) => (v && `${v}`.trim() ? `${v}` : "Not provided");
+const safe = (v) => (v && `${ v }`.trim() ? `${ v }` : "Not provided");
 
 const FieldRow = ({ label, value }) => (
   <View style={styles.row}>
@@ -105,9 +105,11 @@ export const IRBApplicationPDF = ({ data = {} }) => (
   </Document>
 );
 
-export const ConsentFormPDF = ({ data = {} }) => (
+export const ConsentFormPDF = ({ data = {}, generated = {} }) => (
+
   <Document>
     <Page size="A4" style={styles.page}>
+
       <Text style={styles.title}>Informed Consent Form</Text>
 
       <View style={styles.section}>
@@ -121,9 +123,21 @@ export const ConsentFormPDF = ({ data = {} }) => (
 
       <View style={styles.section}>
         <Text style={styles.subtitle}>Why am I being asked to join?</Text>
+
+        <Text>
+          {data.generatedContent?.lay_summary || ""}
+        </Text>
+
         <FieldRow label="Target Age Range" value={data.population_age_range} />
         <FieldRow label="Key Inclusion Criteria" value={data.inclusion_criteria_summary} />
         <FieldRow label="Key Exclusion Criteria" value={data.exclusion_criteria_summary} />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.subtitle}>What are the risks?</Text>
+        <Text>
+          {data.generatedContent?.risk_description || data.stopping_rules_summary || "No risk information available"}
+        </Text>
       </View>
 
       <View style={styles.section}>
