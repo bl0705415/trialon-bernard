@@ -839,12 +839,6 @@ const Upload = ({ onParsed, onCancel }) => {
   );
 };
 
-//DELETE A STUDY
-const handleDeleteStudy = async (studyId) => {
-  const { error } = await supabase.from("studies").delete().eq("id", studyId);
-  if (!error) setStudies(prev => prev.filter(s => s.studyId !== studyId));
-};
-
 
 // ─── AllStudies ────
 const AllStudies = ({ studies, onSelect, onNew, onDelete }) => {
@@ -1547,6 +1541,12 @@ function App() {
   const [wizardData,setWizardData]     = useState(null);
   const [selectedStudy,setSelectedStudy] = useState(null);
   const [generatingDocs,setGeneratingDocs] = useState(false);
+  //DELETE A STUDY
+  const handleDeleteStudy = async (studyId) => {
+    const { error } = await supabase.from("studies").delete().eq("id", studyId);
+    if (!error) setStudies(prev => prev.filter(s => s.studyId !== studyId));
+    else alert("Failed to delete: " + error.message);
+  };
 
   // Load studies from Supabase on login
   useEffect(() => {
@@ -1606,7 +1606,11 @@ function App() {
     else { finalize(extracted, form); }
   };
 
+  const finalizingRef = useRef(false);
+
   const finalize = async (data, form) => {
+    if (finalizingRef.current) return;
+    finalizingRef.current = true;
     try {
       setGeneratingDocs(true);
 
@@ -1721,6 +1725,7 @@ function App() {
       alert("There was a problem setting up the study: " + err.message);
     } finally {
       setGeneratingDocs(false);
+      finalizingRef.current = false;
     }
   };
 
