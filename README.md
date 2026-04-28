@@ -105,17 +105,17 @@ TrialON supports three distinct user roles with hardcoded test accounts (no real
 - Upload a protocol PDF → GPT extracts 50 fields → missing fields prompted one at a time
 - Review all extracted fields, then navigate to Documents
 - **Send to Legal** and **Send to CRO** buttons push the study to the respective reviewer
-- Click **View** on any document PDF to generate it (uses `@react-pdf/renderer`) and upload to Supabase Storage — **CRUCIAL: PDFs are only generated when the RC clicks View for the first time**
+- Click **View** on any document PDF to generate it (uses `@react-pdf/renderer`) and upload to Supabase Storage 
 - Delete studies (soft delete — hidden from UI but kept in Supabase)
 
 2. Legal Reviewer
 - Only sees studies where RC has clicked "Send to Legal"
-- Can view/download generated PDFs via "View PDFs →" button (only available after RC has clicked View)
+- Can view/download generated PDFs via "View PDFs →" button 
 - Status updates (approved/flagged) are saved back to Supabase in real time
 
 3. Sponsor / CRO
 - Only sees studies where RC has clicked "Send to CRO"
-- Can view/download generated PDFs via "View PDFs →" button (only available after RC has clicked View)
+- Can view/download generated PDFs via "View PDFs →" button
 - Status updates saved to Supabase in real time
 
 
