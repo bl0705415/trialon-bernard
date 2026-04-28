@@ -1,0 +1,26 @@
+
+```txt
+# NOTE:
+# This project is implemented in JavaScript using Node.js and React.
+# Dependencies are managed via package.json and installed with npm.
+# This file is provided for documentation purposes only.
+
+# Core Framework
+react
+react-dom
+react-scripts
+
+# Backend / Storage
+@supabase/supabase-js
+
+# PDF Processing
+pdfjs-dist
+@react-pdf/renderer
+
+# UI Libraries
+lucide-react
+tailwindcss
+postcss
+
+# Utilities
+web-vitals
