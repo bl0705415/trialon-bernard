@@ -1,5 +1,5 @@
 
-# TrialON
+# TrialOn - AI-Powered Clinical Trial Protocol Extraction and IRB Document Generation
 
 **AI-Assisted IRB Preparation & Study Startup Acceleration**
 
