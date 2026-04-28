@@ -1,4 +1,10 @@
-// Syntax itself is AI generated. `
+/**
+ * AI Attribution:
+ * ChatGPT was used to assist with file handling and API integration.
+ * The logic for triggering the extraction and generation pipeline,
+ * as well as debugging data flow, was implemented manually.
+ */
+
 import React, { useState, useCallback } from "react";
 import C from "../constants/colors";
 import { extractTextFromPDF } from "../utils/extractPdfText";
