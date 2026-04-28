@@ -3,7 +3,7 @@
 
 **AI-Assisted IRB Preparation & Study Startup Acceleration**
 
-##Description
+## Description
 
 This project is a web application that uses large language models to extract structured data from clinical trial protocol PDFs and automatically generate regulatory documents. It implements a multi-stage ML pipeline combining information extraction and controlled text generation.
 
