@@ -1,5 +1,4 @@
-
-
+// Syntax itself is AI generated. `
 import React, { useState, useCallback } from "react";
 import C from "../constants/colors";
 import { extractTextFromPDF } from "../utils/extractPdfText";

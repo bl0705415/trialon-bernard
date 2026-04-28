@@ -144,11 +144,7 @@ function App() {
             extractedData,
             contractSections: r.contract_sections || [],
             consentSections: r.consent_sections || [],
-            documents: [
-              { id: "irb", name: "IRB Application.pdf", type: "IRB Application", createdAt: r.uploaded_at },
-              { id: "consent", name: "Consent Form.pdf", type: "Consent Form", createdAt: r.uploaded_at },
-              { id: "cta", name: "Draft Clinical Trial Agreement.pdf", type: "Clinical Trial Agreement", createdAt: r.uploaded_at },
-            ],
+            documents: r.documents || [],
             templates: tmpls,
             clauses: cls,
           };
@@ -217,7 +213,7 @@ function App() {
           id: "cta",
           name: "Draft Clinical Trial Agreement.pdf",
           type: "Clinical Trial Agreement",
-          path: `${studyId}/cta-${Date.now()}.pdf`,
+          path: `${ studyId }/cta-${ Date.now() }.pdf`,
           createdAt: new Date().toISOString()
         }
       ];
@@ -284,20 +280,23 @@ function App() {
 
       // ── Save to Supabase ──
       console.log("=== ABOUT TO INSERT ===", { id: studyId, studyId, title: newStudy.title });
-      const { data: insertData, error: insertError } = await supabase.from("studies").insert({
-        id: studyId,
-        title: newStudy.title,
-        sponsor: newStudy.sponsor,
-        phases: newStudy.phases,
-        pi: newStudy.pi,
-        contract_sections: contractSections,
-        consent_sections: consentSections,
-        uploaded_at: Date.now(),
-        extracted_fields: {
-          ...data,
-          generatedContent: data.generatedContent || {}
-        }, archived: false,
-      });
+      const { data: insertData, error: insertError } = await supabase
+        .from("studies")
+        .insert({
+          id: studyId,
+          title: newStudy.title,
+          sponsor: newStudy.sponsor,
+          phases: newStudy.phases,
+          pi: newStudy.pi,
+          contract_sections: contractSections,
+          consent_sections: consentSections,
+          uploaded_at: Date.now(),
+          extracted_fields: data,
+          documents: documents,  
+          archived: false,
+        })
+        .select();   // 👈 ADD THIS
+      console.log("INSERTED ROW:", insertData);
       console.log("=== INSERT DONE ===", { insertData, insertError });
       if (insertError) console.error("Supabase insert error:", insertError.message);
 
@@ -432,10 +431,25 @@ function App() {
         return <Upload onParsed={handleExtracted} />;
 
       case PERSONAS.L:
-        if (page === "study" || page === "studies" || page === "review" || page === "tasks") return <LegalDashboard onNav={setPage} onViewPDFs={(study) => { setSelectedStudy(study); setPage("legalDocs"); }} />;
+        if (page === "study" || page === "studies" || page === "review" || page === "tasks") return <LegalDashboard onViewPDFs={(study) => {
+          const fullStudy = studies.find(
+            s => s.id === (study.id || study.studyId)
+          );
+
+          console.log("STUDY PASSED IN:", study);
+          console.log("MATCHED FULL STUDY:", fullStudy);
+
+          if (!fullStudy) {
+            alert("Could not find study — ID mismatch.");
+            return;
+          }
+
+          setSelectedStudy(fullStudy);
+          setPage("legalDocs");
+        }} />;
         if (page === "legalDocs" && selectedStudy) return (
           <LegalDocumentsTab
-            studyId={selectedStudy.studyId}
+            documents={selectedStudy.documents || []}
             studyTitle={selectedStudy.title}
             isPushed={selectedStudy.pushed_to_legal || false}
             onBack={() => setPage("study")}
@@ -445,10 +459,25 @@ function App() {
         return <FieldsSummary extractedData={studyData} onContinue={() => setPage("study")} editable />;
 
       case PERSONAS.S:
-        if (page === "study" || page === "studies" || page === "review" || page === "tasks") return <CRODashboard onNav={setPage} onViewPDFs={(study) => { setSelectedStudy(study); setPage("legalDocs"); }} />;
+        if (page === "study" || page === "studies" || page === "review" || page === "tasks") return <CRODashboard onNav={setPage} onViewPDFs={(study) => {
+          const fullStudy = studies.find(
+            s => s.id === (study.id || study.studyId)
+          );
+
+          console.log("STUDY PASSED IN:", study);
+          console.log("MATCHED FULL STUDY:", fullStudy);
+
+          if (!fullStudy) {
+            alert("Could not find study — ID mismatch.");
+            return;
+          }
+
+          setSelectedStudy(fullStudy);
+          setPage("legalDocs");
+        }} />;
         if (page === "legalDocs" && selectedStudy) return (
           <LegalDocumentsTab
-            studyId={selectedStudy.studyId}
+            documents={selectedStudy.documents || []}
             studyTitle={selectedStudy.title}
             isPushed={selectedStudy.pushed_to_cro || false}
             onBack={() => setPage("study")}
