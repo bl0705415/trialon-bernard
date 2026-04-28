@@ -3,7 +3,9 @@
 
 **AI-Assisted IRB Preparation & Study Startup Acceleration**
 
-TrialON is a demo platform that parses clinical trial protocol PDFs and automatically fills out IRB applications, informed consent forms, legal agreements, and other regulatory documents — streamlining the bureaucratic process between research, legal, and sponsor teams.
+##Description
+
+This project is a web application that uses large language models to extract structured data from clinical trial protocol PDFs and automatically generate regulatory documents. It implements a multi-stage ML pipeline combining information extraction and controlled text generation.
 
 ---
 
@@ -13,7 +15,7 @@ Upload a clinical trial protocol PDF and TrialON uses GPT-4.1 (via Duke's LiteLL
 
 | Template | Description |
 |----------|-------------|
-| 📋 **IRB Application** | ~40 fields across sections A.1–B.7 (contact info, summary checklist, common questions, consent process, direct interaction) |
+| 📋 **IRB Application** | 50 fields across sections A.1–B.7 (contact info, summary checklist, common questions, consent process, direct interaction) |
 | 📝 **Informed Consent Form** | Long-form adult consent based on Duke template (key summary, purpose, risks, HIPAA, injuries, withdrawal) |
 | 🤝 **IRB Reliance Agreement** | HRP-235 WCG IRB reliance agreement (organization info, protocol details, PI) |
 | 🔒 **Personal Data Disclosure** | Compensation & tax reporting form for research participants |
