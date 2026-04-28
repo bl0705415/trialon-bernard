@@ -1,3 +1,12 @@
+
+/**
+ * AI Attribution:
+ * ChatGPT was used to help structure API calls to the LiteLLM endpoint
+ * and design prompts for structured extraction and document generation.
+ * The prompts, response parsing, and integration into the application
+ * were modified and debugged manually by the author.
+ */
+
 import { PROTOCOL_FIELDS } from "../constants/protocolFields";
 
 const LITELLM_BASE = "https://litellm-01.oit.duke.edu";

@@ -1,5 +1,10 @@
 
-
+/**
+ * AI Attribution:
+ * ChatGPT was used to assist with UI structure and event handling logic.
+ * The final implementation, debugging, and integration with backend data
+ * were completed manually by the author.
+ */
 
 
 import C from "../constants/colors";

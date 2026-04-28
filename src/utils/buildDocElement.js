@@ -1,4 +1,12 @@
 
+/**
+ * AI Attribution:
+ * ChatGPT assisted in structuring the mapping between document types and PDF components.
+ * The final implementation and integration with the document generation pipeline
+ * were completed manually by the author.
+ */
+
+
 import { build } from "pdfjs-dist";
 import {
     IRBApplicationPDF,

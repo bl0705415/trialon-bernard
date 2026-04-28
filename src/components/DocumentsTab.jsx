@@ -1,4 +1,13 @@
 
+
+/**
+ * AI Attribution:
+ * ChatGPT assisted with structuring the document display interface and interaction patterns.
+ * The final implementation, including state handling and integration with generated
+ * documents, was completed and refined manually.
+ */
+
+
 import React from "react";
 import C from "../constants/colors";
 import DocCard from "./DocCard";

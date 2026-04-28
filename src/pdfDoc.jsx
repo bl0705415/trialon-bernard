@@ -1,3 +1,12 @@
+
+
+/**
+ * AI Attribution:
+ * ChatGPT assisted in generating initial React-PDF component structure
+ * and layout suggestions. Styling, data binding, and integration with
+ * generated content were implemented and refined manually.
+ */
+
 import React from "react";
 import {
   Document,

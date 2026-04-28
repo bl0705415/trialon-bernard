@@ -1,4 +1,8 @@
-
+/**
+ * AI Attribution:
+ * ChatGPT assisted with UI structure and state handling logic.
+ * The final implementation and integration were completed manually.
+ */
 
 import React, { useState } from "react";
 import C from "../constants/colors";

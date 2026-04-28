@@ -1,4 +1,9 @@
-
+/**
+ * AI Attribution:
+ * ChatGPT was used to suggest structure for state management and
+ * asynchronous workflows. The overall application architecture,
+ * data flow, and debugging were designed and implemented by the author.
+ */
 
 import React, { useState, useEffect, useRef } from "react";
 import * as pdfjsLib from 'pdfjs-dist';
