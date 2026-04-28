@@ -42,12 +42,12 @@ http://localhost:3000
 
 ---
 
-## Backend / Database
+## External Services
 
-This project uses a preconfigured Supabase backend.
-
-- No setup is required for database or storage
-
+This project uses the following external services:
+1. Supabase for database and file storage
+2. Duke LiteLLM API (GPT-4.1) for text extraction and document generation
+These services are preconfigured in the code, so no additional setup is required.
 ---
 
 ## Notes
