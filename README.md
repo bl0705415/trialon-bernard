@@ -5,7 +5,7 @@
 
 ## Description
 
-This project is a web application that uses large language models to extract structured data from clinical trial protocol PDFs and automatically generate regulatory documents. It implements a multi-stage ML pipeline combining information extraction and controlled text generation.
+The period between the development of a clinical trial protocol and the initial enrollment of patients is known as clinical trial start-up. It involves transferring information from the protocol, which can often be hundreds of pages long, onto a series of documents to form an Institutional Review Board (IRB) application. Currently, the IRB Application is an inefficient, months-long process that requires tedious protocol analysis as well as dependencies between Regulatory Coordinators (RCs), Legal Coordinators, and Contract Research Organizations (CROs) or study sponsors. There exists no streamlined way to populate IRB Application documents and efficiently communicate across these personas. TrialOn aims to provide this missing functionality, using a multi-stage LLM pipeline to extract structured data and automatically generate several selected regulatory documents from an upload protocol PDF according to stored templates and creative text generation. 
 
 ---
 
@@ -33,7 +33,13 @@ npm start
 The app will open at [http://localhost:3000](http://localhost:3000).
 When prompted, upload Sample_protocol.pdf (attached sample protocol) and run the application.
 
+---
 
+## Video Links:
+
+**Demo Video: **
+
+**Technical Walkthrough: **
 
 ---
 
