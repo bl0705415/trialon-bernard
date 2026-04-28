@@ -1,7 +1,7 @@
 
 # TrialOn - AI-Powered Clinical Trial Protocol Extraction and IRB Document Generation
 
-**AI-Assisted IRB Preparation & Study Startup Acceleration**
+
 
 ## Description
 
@@ -11,23 +11,25 @@ This project is a web application that uses large language models to extract str
 
 ## What It Does
 
-Upload a clinical trial protocol PDF and TrialON uses GPT-4.1 (via Duke's LiteLLM API) to automatically extract **50 protocol fields** and generate drafts for **5 regulatory documents**:
+**High-Level Overview:**
+This project allows users to upload clinical trial protocol PDFs and automatically processes them through a multi-stage machine learning pipeline. First, a pretrained language model extracts 50 structured fields from unstructured protocol text, converting it into a standardized representation. Next, a second model uses these structured features to generate human-readable sections such as lay summaries and risk descriptions. These outputs are then integrated into dynamically generated regulatory documents, including informed consent forms and clinical trial agreements, which are rendered as PDFs. The system provides an interactive web interface where users can review extracted data, complete missing fields, and generate finalized documents in real time.
+
+
+**Detailed Description:**
+
+Upload a clinical trial protocol PDF, and TrialON will use GPT-4.1 (via Duke's LiteLLM API) to automatically extract 50 protocol fields and generate drafts for a general IRB application form, informed consent form, and a study contract form:
 
 | Template | Description |
 |----------|-------------|
-| 📋 **IRB Application** | 50 fields across sections A.1–B.7 (contact info, summary checklist, common questions, consent process, direct interaction) |
-| 📝 **Informed Consent Form** | Long-form adult consent based on Duke template (key summary, purpose, risks, HIPAA, injuries, withdrawal) |
-| 🤝 **IRB Reliance Agreement** | HRP-235 WCG IRB reliance agreement (organization info, protocol details, PI) |
-| 🔒 **Personal Data Disclosure** | Compensation & tax reporting form for research participants |
-| ✅ **Study Planning Checklist** | Clinical study planning checklist (study ID, type, phase, enrollment, locations) |
+| **IRB Application** | 50 fields across sections A.1–B.7 (contact info, summary checklist, common questions, consent process, direct interaction) |
+| **Informed Consent Form** | Long-form adult consent based on Duke template (key summary, purpose, risks, HIPAA, injuries, withdrawal) |
+| **IRB Reliance Agreement/Contract** | HRP-235 WCG IRB reliance agreement (organization info, protocol details, PI) |
 
 Each field is tagged as:
-- 🟢 **Auto-filled** — extracted directly from the protocol PDF
-- 🔴 **Missing** — not found in protocol, prompted to RC one at a time via wizard
+- **Auto-filled** — extracted directly from the protocol PDF
+- **Missing** — not found in protocol, prompted to RC one at a time via wizard
 
----
-
-## Three Persona Views
+**Three-Persona Guide:**
 
 TrialON supports three distinct user roles with hardcoded test accounts (no real auth):
 
@@ -41,19 +43,17 @@ TrialON supports three distinct user roles with hardcoded test accounts (no real
 - Upload a protocol PDF → GPT extracts 50 fields → missing fields prompted one at a time
 - Review all extracted fields, then navigate to Documents
 - **Send to Legal** and **Send to CRO** buttons push the study to the respective reviewer
-- Click **View** on any document PDF to generate it (uses `@react-pdf/renderer`) and upload to Supabase Storage — **PDFs are only generated when the RC clicks View for the first time**
-- Archive studies (soft delete — hidden from UI but kept in Supabase)
+- Click **View** on any document PDF to generate it (uses `@react-pdf/renderer`) and upload to Supabase Storage — **CRUCIAL: PDFs are only generated when the RC clicks View for the first time**
+- Delete studies (soft delete — hidden from UI but kept in Supabase)
 
 ### 2. Legal Reviewer
 - Only sees studies where RC has clicked "Send to Legal"
-- Sees **Contract Sections (CTA) only** — can approve or flag each section
 - Can view/download generated PDFs via "View PDFs →" button (only available after RC has clicked View)
 - Status updates (approved/flagged) are saved back to Supabase in real time
 
 ### 3. Sponsor / CRO
 - Only sees studies where RC has clicked "Send to CRO"
-- Sees **Consent Form sections (ICF) only** — can accept or counter-propose each section
-- Can view/download generated PDFs via "View PDFs →" button
+- Can view/download generated PDFs via "View PDFs →" button (only available after RC has clicked View)
 - Status updates saved to Supabase in real time
 
 ---
