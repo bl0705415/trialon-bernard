@@ -1,6 +1,4 @@
 
-```txt
-# NOTE:
 # This project is implemented in JavaScript using Node.js and React.
 # Dependencies are managed via package.json and installed with npm.
 # This file is provided for documentation purposes only.
