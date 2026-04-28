@@ -29,6 +29,8 @@ Each field is tagged as:
 - **Auto-filled** — extracted directly from the protocol PDF
 - **Missing** — not found in protocol, prompted to RC one at a time via wizard
 
+
+
 **Three-Persona Guide:**
 
 TrialON supports three distinct user roles with hardcoded test accounts (no real auth):
