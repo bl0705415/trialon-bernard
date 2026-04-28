@@ -11,8 +11,53 @@ This project is a web application that uses large language models to extract str
 
 ## What It Does
 
-**High-Level Overview:**
 This project allows users to upload clinical trial protocol PDFs and automatically processes them through a multi-stage machine learning pipeline. First, a pretrained language model extracts 50 structured fields from unstructured protocol text, converting it into a standardized representation. Next, a second model uses these structured features to generate human-readable sections such as lay summaries and risk descriptions. These outputs are then integrated into dynamically generated regulatory documents, including informed consent forms and clinical trial agreements, which are rendered as PDFs. The system provides an interactive web interface where users can review extracted data, complete missing fields, and generate finalized documents in real time.
+
+---
+
+## Quick Start:
+
+### Prerequisites
+- Node.js
+- npm
+
+### Setup
+
+```bash
+git clone <your-repo-url>
+cd <your-repo>
+npm install
+npm start
+```
+
+The app will open at [http://localhost:3000](http://localhost:3000).
+When prompted, upload Sample_protocol.pdf (attached sample protocol) and run the application.
+
+
+
+---
+
+## Evaluations:
+
+**Missing Fields/Extraction Quality:**
+The system tracks how many of the 50 protocol fields are automatically populated versus how many require manual completion in the review workflow. In typical use, the extraction stage populates the majority of fields, while missing or uncertain fields are surfaced to the user for correction through the Field Wizard. This provides a practical measure of extraction completeness and helps identify where the model is less reliable.
+
+**Quality of Patient-Facing Generated Sections:**
+I qualitatively evaluated the second-stage generation outputs, especially the lay summary and risk description used in the informed consent form. In testing, the multi-stage pipeline consistently produced readable, structured patient-facing sections that were aligned with the extracted protocol data and appropriate for inclusion in draft regulatory documents.
+
+**System Performance:**
+The application performs end-to-end inference at upload time, including PDF text extraction, structured field extraction, and second-stage document text generation. In practice, this completes within a few seconds per uploaded protocol and is fast enough to support interactive use in the web application.
+
+---
+
+## Individual Contributions:
+
+This project was completed alone.
+
+
+---
+
+## Extra Information (Personal):
 
 
 **Detailed Description:**
@@ -30,6 +75,15 @@ Each field is tagged as:
 - **Missing** — not found in protocol, prompted to RC one at a time via wizard
 
 
+**How Parsing Works**
+
+1. The user uploads a `.pdf` clinical trial protocol file  
+2. `pdfjs-dist` extracts raw text from each page directly in the browser  
+3. The extracted text (truncated to ~14,000 characters to fit model limits) is sent to Duke’s LiteLLM API (GPT-4.1)  
+4. The model is prompted to return exactly 50 structured fields in JSON format, effectively converting unstructured text into a standardized schema  
+5. Any missing or uncertain fields are presented to the user through a **Missing Fields Wizard** for manual completion  
+6. The finalized structured data is stored in Supabase and used downstream to generate regulatory documents such as consent forms
+
 
 **Three-Persona Guide:**
 
@@ -41,232 +95,21 @@ TrialON supports three distinct user roles with hardcoded test accounts (no real
 | legal@test.com | test234 | Legal Reviewer |
 | cro@test.com | test123 | Sponsor / CRO |
 
-### 1. Research Coordinator (RC)
+1. Research Coordinator (RC)
 - Upload a protocol PDF → GPT extracts 50 fields → missing fields prompted one at a time
 - Review all extracted fields, then navigate to Documents
 - **Send to Legal** and **Send to CRO** buttons push the study to the respective reviewer
 - Click **View** on any document PDF to generate it (uses `@react-pdf/renderer`) and upload to Supabase Storage — **CRUCIAL: PDFs are only generated when the RC clicks View for the first time**
 - Delete studies (soft delete — hidden from UI but kept in Supabase)
 
-### 2. Legal Reviewer
+2. Legal Reviewer
 - Only sees studies where RC has clicked "Send to Legal"
 - Can view/download generated PDFs via "View PDFs →" button (only available after RC has clicked View)
 - Status updates (approved/flagged) are saved back to Supabase in real time
 
-### 3. Sponsor / CRO
+3. Sponsor / CRO
 - Only sees studies where RC has clicked "Send to CRO"
 - Can view/download generated PDFs via "View PDFs →" button (only available after RC has clicked View)
 - Status updates saved to Supabase in real time
 
----
 
-## Running Locally
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v16 or higher)
-- npm (comes with Node.js)
-
-### Setup
-
-```bash
-# Clone the repo
-git clone git@github.com:amd226/trial-on.git
-cd trial-on
-
-# Install dependencies
-npm install
-
-# Copy the PDF.js worker file (required for PDF parsing)
-cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.js
-
-# Start the development server
-npm start
-```
-
-The app will open at [http://localhost:3000](http://localhost:3000).
-
-> ⚠️ **The `pdf.worker.min.js` copy step is required every time you do a fresh `npm install`.** Without it, PDF uploads will fail with a worker version mismatch error.
-
----
-
-## Key Dependencies
-
-Install these if they are missing:
-
-```bash
-npm install @supabase/supabase-js pdfjs-dist lucide-react @react-pdf/renderer
-```
-
-| Package | Purpose |
-|---------|---------|
-| `pdfjs-dist` | Extract text from uploaded protocol PDFs |
-| `@supabase/supabase-js` | Database (studies table) and file storage (PDF bucket) |
-| `lucide-react` | Sidebar icons |
-| `@react-pdf/renderer` | Generate IRB, Consent, and CTA PDFs client-side |
-
----
-
-## How Parsing Works
-
-1. The RC uploads a `.pdf` protocol file
-2. `pdfjs-dist` extracts raw text from every page client-side in the browser
-3. The raw text (up to 14,000 characters) is sent to **Duke's LiteLLM API** (GPT 4.1) with a structured prompt asking it to return exactly 50 fields as a JSON object
-4. Any fields GPT couldn't find are prompted to the RC one at a time through the **Missing Fields Wizard**
-5. The completed 50-field object is saved to Supabase along with auto-generated contract and consent sections
-
-### LiteLLM Configuration
-```
-Base URL: https://litellm-01.oit.duke.edu
-Model:    GPT 4.1
-Key:      sk-nC6KVrXD65MVLvso4sXsKA  (team key — do not use gpt-4o, it is not allowed)
-```
-
-### 50 Extracted Fields
-Fields span 13 categories: Study Identification, Regulatory, Study Design, Study Population, Study Product, Procedures, Risk/Safety, Consent, Recruitment, Payments to Subjects, Data/Privacy, Specimens, and Specimens/Genetics.
-
----
-
-## Supabase Setup
-
-**Project URL:** `https://rxepavvxustsikfsilpc.supabase.co`
-
-### Database Tables
-
-#### `studies` table
-```sql
-create table studies (
-  id text primary key,
-  title text,
-  sponsor text,
-  phases text,
-  pi text,
-  contract_sections jsonb,
-  consent_sections jsonb,
-  extracted_fields jsonb,
-  uploaded_at bigint,
-  archived boolean default false,
-  pushed_to_legal boolean default false,
-  pushed_to_cro boolean default false,
-  created_at timestamp default now()
-);
-```
-
-RLS policies: public select, insert, and update all enabled.
-
-### Storage
-
-**Bucket:** `study-pdfs` (public)
-
-PDFs are stored at path: `{studyId}/{docId}.pdf` where `docId` is one of `irb`, `consent`, or `cta`.
-
-Required storage policies on `study-pdfs`:
-- **Allow public uploads** — INSERT, policy definition: `true`
-- **Allow public reads** — SELECT, policy definition: `true`
-
-> ⚠️ PDFs are only generated and uploaded when the RC clicks **View** on a document for the first time. Until then, Legal/CRO will see "Object not found" if they try to view the PDF directly.
-
----
-
-## Project Structure
-
-```
-src/
-├── App.js          # Main single-file React app (all components and logic)
-├── pdfDoc.jsx      # PDF document components using @react-pdf/renderer
-│                   #   - IRBApplicationPDF
-│                   #   - ConsentFormPDF
-│                   #   - ClinicalTrialAgreementPDF
-└── pdfUtils.js     # PDF generation and Supabase Storage utilities
-                    #   - getPdfUrl()      — generate + upload + cache PDF
-                    #   - downloadPdf()    — trigger browser download
-                    #   - invalidateStudyCache() — clear cached PDFs
-
-public/
-└── pdf.worker.min.js   # Required pdfjs worker (copy from node_modules — see setup)
-```
-
----
-
-## Data Flow
-
-```
-RC uploads PDF
-    → pdfjs extracts text
-    → LiteLLM/GPT-4.1 extracts 50 fields
-    → Missing fields wizard fills gaps
-    → Study saved to Supabase (studies table)
-    → RC clicks "Send to Legal" → pushed_to_legal = true in Supabase
-    → RC clicks "Send to CRO"  → pushed_to_cro = true in Supabase
-    → RC clicks "View" PDF     → @react-pdf/renderer generates PDF
-                               → uploaded to Supabase Storage study-pdfs bucket
-
-Legal logs in
-    → Fetches studies where pushed_to_legal = true
-    → Sees Contract Sections (CTA) only
-    → Can approve/flag sections (saved to Supabase)
-    → Can view/download PDFs from Supabase Storage
-
-CRO logs in
-    → Fetches studies where pushed_to_cro = true
-    → Sees Consent Form sections (ICF) only
-    → Can accept/counter-propose sections (saved to Supabase)
-    → Can view/download PDFs from Supabase Storage
-```
-
----
-
-## Git Workflow (Multiple Contributors)
-
-Always pull before pushing to avoid conflicts:
-
-```bash
-git stash && git pull origin main --rebase && git stash pop && git push origin main
-```
-
-If there are merge conflicts on `package.json` or `package-lock.json`:
-
-```bash
-git checkout --theirs package.json package-lock.json
-git add package.json package-lock.json
-git commit -m "merge: accept partner package changes"
-npm install
-```
-
----
-
-## Known Limitations
-
-- **No real authentication** — roles are hardcoded with test accounts
-- **No email notifications** — document pushes are flag-based only; reviewers need to manually refresh
-- **PDFs only generate on RC View click** — Legal/CRO cannot view PDFs until RC has opened them at least once
-- **Vercel deployment is not currently active** — run locally with `npm start`
-- **LiteLLM key is a shared team key** — do not use `gpt-4o` model, only `GPT 4.1` is permitted
-
----
-
-## Important Disclaimers
-
-> ⚠️ **This is a demo/MVP — not a production system.**
->
-> - All generated content is marked as DRAFT and requires human review
-> - This tool does not guarantee IRB approval or regulatory compliance
-> - Responsibility for accuracy remains with the research team
-> - No real IRB system integrations are implemented
-> - Do not use generated documents for actual regulatory submissions without thorough review
-
----
-
-## Tech Stack
-
-- **React** (Create React App)
-- **Supabase** (PostgreSQL database + file storage)
-- **Duke LiteLLM API** (GPT 4.1 for field extraction)
-- **pdfjs-dist** (client-side PDF text extraction)
-- **@react-pdf/renderer** (client-side PDF generation)
-- **lucide-react** (icons)
-
----
-
-=======
-# trialon-bernard
-Personal IRB Application Project
